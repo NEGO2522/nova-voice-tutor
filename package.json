@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.1008.0",
+    "@aws-sdk/client-transcribe": "^3.1008.0",
     "aws-sdk": "^2.1693.0",
     "mic-recorder-to-mp3": "^2.2.2",
     "next": "16.1.6",
