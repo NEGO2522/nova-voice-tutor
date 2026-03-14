@@ -20,6 +20,12 @@ export async function POST(req: Request) {
       contentType: "application/json",
       accept: "application/json",
       body: JSON.stringify({
+        // Adding the system prompt here defines the "Friendly Friend" personality
+        system: [
+          {
+            text: "You are Nova, a friendly and supportive AI tutor who talks like a close friend. Use a warm, casual, and encouraging tone. If the user asks how you are, tell them you're doing great and ask about them. Keep your answers conversational and helpful."
+          }
+        ],
         messages: [
           {
             role: "user",
@@ -31,17 +37,15 @@ export async function POST(req: Request) {
           },
         ],
         inferenceConfig: {
-          max_new_tokens: 200,
+          max_new_tokens: 300, // Slightly increased for more natural conversation
+          temperature: 0.7,    // Added a bit of 'creativity' for a more human feel
         },
       }),
     };
 
     const command = new InvokeModelCommand(input);
-
     const response = await bedrockClient.send(command);
-
     const responseBody = new TextDecoder().decode(response.body);
-
     const data = JSON.parse(responseBody);
 
     const aiAnswer = data.output.message.content[0].text;
@@ -54,7 +58,6 @@ export async function POST(req: Request) {
 
   } catch (error) {
     console.error(error);
-
     return Response.json(
       { error: "Something went wrong" },
       { status: 500 }
