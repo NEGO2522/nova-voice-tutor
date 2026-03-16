@@ -188,12 +188,12 @@ export default function VoiceRecorder() {
 
           {/* sidebar header */}
           <div className="flex items-center justify-between px-5 py-5 border-b border-white/10">
-            <div className="flex items-center gap-2.5">
+            <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
               <div className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_#3b82f6]" />
               <span className="text-sm uppercase font-light tracking-widest">
                 Nova <span className="font-bold text-blue-400">AI</span>
               </span>
-            </div>
+            </Link>
             <button
               onClick={newChat}
               className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl px-3 py-1.5 transition-all duration-200"

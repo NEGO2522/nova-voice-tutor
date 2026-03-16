@@ -285,7 +285,82 @@ function LiveDemo() {
           </svg>
         </div>
       </div>
+
     </div>
+  );
+}
+
+/* ─────────────────────────────────────────
+   Contact form (inside panel)
+───────────────────────────────────────── */
+function ContactPanelForm() {
+  const [form, setForm]           = useState({ name: "", email: "", message: "" });
+  const [state, setState]         = useState<"idle"|"sending"|"sent">("idle");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setState("sending");
+    await new Promise((r) => setTimeout(r, 1600));
+    setState("sent");
+  };
+
+  if (state === "sent") return (
+    <div className="backdrop-blur-md bg-white/[0.03] border border-white/10 rounded-3xl p-8 flex flex-col items-center gap-4 text-center">
+      <div className="w-14 h-14 rounded-full bg-blue-500/20 border border-blue-500/40 flex items-center justify-center shadow-[0_0_24px_#3b82f640]">
+        <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <h3 className="text-base font-semibold">Message Sent!</h3>
+      <p className="text-gray-400 text-sm">Thanks {form.name}, we’ll get back to you soon.</p>
+      <button
+        onClick={() => { setForm({ name: "", email: "", message: "" }); setState("idle"); }}
+        className="text-xs uppercase tracking-widest text-blue-400 hover:text-blue-300 transition-colors"
+      >
+        ← Send another
+      </button>
+    </div>
+  );
+
+  return (
+    <form onSubmit={handleSubmit} className="backdrop-blur-md bg-white/[0.03] border border-white/10 rounded-3xl p-6 flex flex-col gap-4">
+      <h3 className="text-sm font-semibold">Send a Message</h3>
+
+      <div className="flex flex-col gap-1">
+        <label className="text-[10px] uppercase tracking-widest text-gray-500">Name</label>
+        <input type="text" placeholder="Your name" value={form.name} required
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+          className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/60 transition-all duration-200" />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className="text-[10px] uppercase tracking-widest text-gray-500">Email</label>
+        <input type="email" placeholder="you@example.com" value={form.email} required
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
+          className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/60 transition-all duration-200" />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className="text-[10px] uppercase tracking-widest text-gray-500">Message</label>
+        <textarea placeholder="What’s on your mind?" value={form.message} required rows={4}
+          onChange={(e) => setForm({ ...form, message: e.target.value })}
+          className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/60 transition-all duration-200 resize-none" />
+      </div>
+
+      <button type="submit" disabled={state === "sending"}
+        className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white text-sm font-medium rounded-xl px-6 py-3 transition-all duration-300 shadow-[0_0_16px_#2563eb50]"
+      >
+        {state === "sending" ? (
+          <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Sending…</>
+        ) : (
+          <>Send Message
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+          </>
+        )}
+      </button>
+    </form>
   );
 }
 
@@ -578,16 +653,34 @@ function StatCard({ label, value, suffix }: { label: string; value: number; suff
 }
 
 /* ─────────────────────────────────────────
+   Smooth scroll helper
+───────────────────────────────────────── */
+function smoothScroll(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+/* ─────────────────────────────────────────
    Main page
 ───────────────────────────────────────── */
 export default function LandingPage() {
-  const [scrolled, setScrolled] = useState(false);
+  const [scrolled, setScrolled]       = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // lock body scroll only when contact panel is open
+  useEffect(() => {
+    if (contactOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [contactOpen]);
 
   return (
     <div className="relative bg-black text-white overflow-x-hidden font-sans">
@@ -614,9 +707,9 @@ export default function LandingPage() {
 
           {/* Links */}
           <div className="hidden md:flex items-center gap-8 text-xs uppercase tracking-widest text-gray-400">
-            <a href="#features" className="hover:text-white transition-colors">Features</a>
-            <a href="#how"      className="hover:text-white transition-colors">How it works</a>
-            <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
+            <button onClick={() => smoothScroll("features")} className="hover:text-white transition-colors">Features</button>
+            <button onClick={() => smoothScroll("how")}      className="hover:text-white transition-colors">How it works</button>
+            <button onClick={() => setContactOpen(true)}     className="hover:text-white transition-colors">Contact</button>
           </div>
 
           {/* CTA */}
@@ -666,15 +759,15 @@ export default function LandingPage() {
                 </svg>
                 Start Talking to Nova
               </Link>
-              <a
-                href="#features"
+              <button
+                onClick={() => smoothScroll("features")}
                 className="flex items-center gap-2 border border-white/10 hover:border-white/30 text-gray-300 hover:text-white rounded-2xl px-8 py-4 transition-all duration-300 text-sm"
               >
                 See Features
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
                 </svg>
-              </a>
+              </button>
             </div>
 
             {/* Scroll hint */}
@@ -868,8 +961,8 @@ export default function LandingPage() {
               </div>
               <div className="flex items-center gap-8 text-xs uppercase tracking-widest text-gray-500">
                 <Link href="/app"      className="hover:text-white transition-colors">App</Link>
-                <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
-                <a href="#features"   className="hover:text-white transition-colors">Features</a>
+                <button onClick={() => setContactOpen(true)} className="hover:text-white transition-colors">Contact</button>
+                <button onClick={() => smoothScroll("features")} className="hover:text-white transition-colors">Features</button>
               </div>
               <p className="text-xs text-gray-600 uppercase tracking-widest">
                 © {new Date().getFullYear()} Nova AI · Built with ♥
@@ -877,6 +970,91 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* ══════════════════════════════════
+          CONTACT SLIDE PANEL
+      ══════════════════════════════════ */}
+
+      {/* Backdrop */}
+      <div
+        onClick={() => setContactOpen(false)}
+        className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-500 ${
+          contactOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+      />
+
+      {/* Slide panel */}
+      <div
+        className={`fixed top-0 right-0 h-full z-50 w-full max-w-lg flex flex-col bg-[#080c14] border-l border-white/10 shadow-2xl transition-transform duration-500 ease-in-out ${
+          contactOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        {/* Panel header */}
+        <div className="flex items-center justify-between px-8 py-6 border-b border-white/10 flex-shrink-0">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-blue-400 mb-0.5">Get in touch</p>
+            <h2 className="text-xl font-light">Say <span className="font-bold text-white">Hello</span> to Nova</h2>
+          </div>
+          <button
+            onClick={() => setContactOpen(false)}
+            className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 flex items-center justify-center transition-all duration-200"
+          >
+            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Panel body */}
+        <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6 relative" style={{ scrollbarWidth: "none" }}>
+
+          {/* Ambient glow */}
+          <div className="absolute top-0 right-0 w-80 h-80 bg-blue-600/10 rounded-full blur-[100px] pointer-events-none" />
+
+          {/* About */}
+          <div className="backdrop-blur-md bg-white/[0.03] border border-white/10 rounded-3xl p-6">
+            <h3 className="text-sm font-semibold mb-2">About Nova AI</h3>
+            <p className="text-gray-400 text-sm leading-relaxed mb-4">
+              Nova is your voice-powered AI tutor — built to teach, converse, and help you learn in both Hindi and English.
+              Always open to feedback, partnerships, and new ideas.
+            </p>
+            <div className="flex items-center gap-2 text-xs text-gray-500 uppercase tracking-widest">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-[0_0_6px_#4ade80]" />
+              Online &amp; ready to help
+            </div>
+          </div>
+
+          {/* Contact form */}
+          <ContactPanelForm />
+
+          {/* Social links */}
+          <div className="flex flex-col gap-3">
+            {[
+              { label: "Email", value: "hello@nova-ai.dev", href: "mailto:nextgenova28@gmail.com", color: "#3b82f6" },
+              { label: "GitHub", value: "github.com/nova-ai", href: "https://github.com/NEGO2522/nova-voice-tutor", color: "#a855f7" },
+              { label: "Twitter / X", value: "@nova_ai_dev", href: "https://x.com/Kshitij197372", color: "#38bdf8" },
+              { label: "LinkedIn", value: "linkedin.com/in/nova-ai", href: "https://www.linkedin.com/in/kshitij-jain-422025342/", color: "#3b82f6" },
+            ].map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-4 bg-white/[0.03] border border-white/10 hover:border-white/20 rounded-2xl px-5 py-4 transition-all duration-200"
+              >
+                <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: link.color }} />
+                <div className="flex flex-col flex-1 min-w-0">
+                  <span className="text-[10px] uppercase tracking-widest text-gray-500">{link.label}</span>
+                  <span className="text-sm text-gray-300 group-hover:text-white transition-colors truncate">{link.value}</span>
+                </div>
+                <svg className="w-4 h-4 text-gray-600 group-hover:text-gray-300 transition-all group-hover:translate-x-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
 
 
     </div>
