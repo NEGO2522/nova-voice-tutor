@@ -504,10 +504,7 @@ function RobotModel() {
         <rect x="110" y="382" width="50" height="16" rx="8" fill="#1e293b" stroke="#334155" strokeWidth="1" />
         <rect x="180" y="382" width="50" height="16" rx="8" fill="#1e293b" stroke="#334155" strokeWidth="1" />
 
-        {/* ── BODY INDICATOR LIGHTS ── */}
-        <circle cx="125" cy="295" r="4" fill={open ? '#4ade80' : '#166534'} style={{ transition: 'fill 600ms' }} />
-        <circle cx="138" cy="295" r="4" fill={open ? '#60a5fa' : '#1e3a8a'} style={{ transition: 'fill 600ms 100ms' }} />
-        <circle cx="151" cy="295" r="4" fill={open ? '#f97316' : '#7c2d12'} style={{ transition: 'fill 600ms 200ms' }} />
+
 
         {/* ── SCREW CORNERS on body ── */}
         {[[100,165],[235,165],[100,310],[235,310]].map(([cx,cy], i) => (
